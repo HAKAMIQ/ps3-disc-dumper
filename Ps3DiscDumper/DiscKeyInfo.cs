@@ -7,21 +7,21 @@ public class DiscKeyInfo
 {
     public DiscKeyInfo(byte[] encryptedKey, byte[] decryptedKey, string fullPath, KeyType keyType, string keyFileHash)
     {
-        if ((encryptedKey == null || encryptedKey.Length == 0) && (decryptedKey == null || decryptedKey.Length == 0))
+        if (encryptedKey is {Length: >0})
+            DecryptedKey = Decrypter.DecryptDiscKey(encryptedKey);
+        else if (decryptedKey is {Length: >0})
+            DecryptedKey = decryptedKey;
+        else
             throw new ArgumentException("At least one type of disc key must be provided", nameof(encryptedKey));
 
-        if (string.IsNullOrEmpty(keyFileHash))
-            throw new ArgumentException("Key file hash is required and can not be empty", nameof(keyFileHash));
-
-        if (decryptedKey == null || decryptedKey.Length == 0)
-            DecryptedKey = Decrypter.DecryptDiscKey(encryptedKey);
+        if (keyFileHash is {Length: >0})
+            KeyFileHash = keyFileHash;
         else
-            DecryptedKey = decryptedKey;
+            throw new ArgumentException("Key file hash is required and can not be empty", nameof(keyFileHash));
         EncryptedKey = encryptedKey;
         DecryptedKeyId = DecryptedKey.ToHexString();
         FullPath = fullPath;
         KeyType = keyType;
-        KeyFileHash = keyFileHash;
     }
 
     public readonly byte[] EncryptedKey;
